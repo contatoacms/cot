@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <limits>
 #include <math.h>
+//#include <input_output.h>
 
 using namespace std;
 
@@ -19,6 +20,7 @@ class schedule_flow
 public:
 
     schedule_flow();
+    void optimize();
 
     struct truck_info{
         int type;
@@ -62,6 +64,22 @@ public:
 
     vector<arc_info> input_arc_info;
 
+    int n_paths = 0;
+    int n_warehouse = 0;
+    int n_truck_types = 0;
+    int n_attribute = 3; // 0: soy 1:corn 2:wheat
+    int n_trucks = 0;
+    vector<vector<int>> war_path;                  //for all warehouses, the paths that belongs to them
+    vector<vector<int>> att_path;                  //for all attributes, the paths that leads to warehouses of that same attribute
+    vector<vector<int>> type_path;                 //for types of trucks, the paths that they can be proccessed in
+    vector<vector<int>> type_processing_times;     //for each type of truck, the processing times for all paths
+    vector<vector<vector<int>>> permissible_nodes;
+    vector<pair<int,float>> input_warehouse;       // for each warehouse <attribute on it, remaining space>
+    vector<truck_info> input_truck;                // gets the type of truck, attribute and arriving time
+    vector<job> jobs;
+    vector<vector<int>> nodes_with_mandatory_arcs; //For all nodes, holds all the nodes with mandatory connections with it
+    vector<vector<int>> nodes_preemption; //For all nodes, holds all the nodes with mandatory connections with it
+
 private:
 
     /*
@@ -69,17 +87,10 @@ private:
      */
 
     void initialize_graph();
-    void read_data();
-    void read_war_path(ifstream &f);
-    void read_type_path(ifstream &f);
-    void read_war_input(ifstream &f);
-    void read_truck_input(ifstream &f);
-    void read_arc_input(ifstream &f);
     void create_att_path();
     void create_permissible_nodes();
     void create_jobs();
     void create_nodes();
-    void optimize();
     void optimize_constructive();
     void verify_disjoint_arcs(list<int>::iterator it_painted_job, int painted_node, feasibility &n, int node_key);
     void verify_mandatory_disjoint_arcs(list<int>::iterator it_painted_job, int painted_node, feasibility &n, int node_key);
@@ -98,22 +109,11 @@ private:
      * Variables
      */
 
-    vector<vector<int>> war_path;                  //for all warehouses, the paths that belongs to them
-    vector<vector<int>> att_path;                  //for all attributes, the paths that leads to warehouses of that same attribute
-    vector<vector<int>> type_path;                 //for types of trucks, the paths that they can be proccessed in
-    vector<vector<int>> type_processing_times;     //for each type of truck, the processing times for all paths
-    vector<vector<vector<int>>> permissible_nodes;
-    vector<pair<int,float>> input_warehouse;       // for each warehouse <attribute on it, remaining space>
-    vector<truck_info> input_truck;                // gets the type of truck, attribute and arriving time
-    vector<job> jobs;
-    vector<vector<int>> nodes_with_mandatory_arcs; //For all nodes, holds all the nodes with mandatory connections with it
+
+
+
     list<int> painted_jobs,unpainted_jobs;                      //holds all the indexes of the 'jobs' that are allready painted
 
-    int n_paths = 0;
-    int n_warehouse = 0;
-    int n_truck_types = 0;
-    int n_attribute = 3; // 0: soy 1:corn 2:wheat
-    int n_trucks = 0;
 
 };
 

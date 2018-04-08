@@ -2,193 +2,24 @@
 
 schedule_flow::schedule_flow()
 {
+
+    //optimize();
+
+}
+
+void schedule_flow::optimize()
+{
     initialize_graph();
-    optimize();
+    optimize_constructive();
     print_log();
 }
 
 void schedule_flow::initialize_graph()
 {
-    read_data();
+    //read_data();
     create_att_path();
     create_permissible_nodes();
     create_jobs();
-}
-
-void schedule_flow::read_data()
-{
-
-    /*
-     *  Read data from the network, tht informs, for all
-     * warehouses, the paths that leads to them.
-     *  Data from the truck types, and for each of them, wich
-     * paths they can be processed in.
-     *  Data from the warehouses (attribute and avilable volume)
-     *  Truck input, attribute, type, arriving_time and volume
-     */
-
-    string network_path = get_current_working_dir();
-    network_path += "/parameters/network";
-    ifstream f;
-    f.open(network_path,ifstream::in);
-    read_war_path(f);
-    read_type_path(f);
-    read_arc_input(f);
-    f.close();
-
-    network_path = get_current_working_dir();
-    network_path += "/parameters/input";
-    f.open(network_path,ifstream::in);
-    read_war_input(f);
-    f.close();
-
-    string truck_input_path = get_current_working_dir();
-    truck_input_path += "/parameters/input_truck";
-    f.open(truck_input_path,ifstream::in);
-    read_truck_input(f);
-    f.close();
-
-}
-
-void schedule_flow::read_war_path(ifstream &f)
-{
-
-    /*
-     *   Read the information of the paths that leads
-     * to all warehouses eg:
-     * 2         \\there is two warehouses
-     * 2 1 2     \\the first have 2 paths, 1 and 2
-     * 1 3       \\ the second one path, 3
-     *
-     */
-
-    f >> n_warehouse;
-    f >> n_paths;
-    int n_paths,path;
-    for(int i=0;i<n_warehouse;i++)
-    {
-        f >> n_paths;
-        vector<int> paths(n_paths);
-        for(int j=0;j<n_paths;j++)
-        {
-            f >> path;
-            paths[j] = path;
-        } war_path.push_back(paths);
-    }
-    char garbage[1];
-    f >> garbage;
-
-}
-
-void schedule_flow::read_type_path(ifstream &f)
-{
-
-    /*
-     *   Read the information of the paths that a type
-     * of truck could be processed in:
-     * 2         \\there are two types of trucks
-     * 2 1 2     \\ the first one could be processes in 2 paths, 1 and 2
-     * 1 3       \\ the second in one path, 3
-     *
-     */
-
-    f >> n_truck_types;
-    int numb_paths,path;
-    for(int i=0;i<n_truck_types;i++)
-    {
-        f >> numb_paths;
-        vector<int> paths(numb_paths);
-        for(int j=0;j<numb_paths;j++)
-        {
-            f >> path;
-            paths[j] = path;
-        } type_path.push_back(paths);
-    }
-
-    type_processing_times = vector<vector<int>>(n_truck_types);
-    for(int i=0;i<n_truck_types;i++)
-    {
-        type_processing_times[i] = vector<int>(n_paths);
-        for(int j=0;j<n_paths;j++)
-        {
-            f >> type_processing_times[i][j];
-        }
-    }
-
-    char garbage[1];
-    f >> garbage;
-}
-
-void schedule_flow::read_war_input(ifstream &f)
-{
-    int att;
-    float volume;
-    for(int i=0;i<n_warehouse;i++)
-    {
-        f >> att; f >> volume;
-        input_warehouse.push_back(make_pair(att,volume));
-    }    
-
-}
-
-void schedule_flow::read_truck_input(ifstream &f)
-{
-
-    f >> n_trucks;
-    input_truck = vector<truck_info>(n_trucks);
-    for(int i=0;i<n_trucks;i++)
-    {
-        truck_info tr;
-        f >> input_truck[i].type;
-        f >> input_truck[i].att;
-        f >> input_truck[i].vol;
-        f >> input_truck[i].arr_time;
-    }
-}
-
-void schedule_flow::read_arc_input(ifstream &f)
-{
-
-
-    /*
-     * Read, for all the possible paths, the type of arcs that are
-     * attached to them, and the nodes where those arcs must
-     * be connected to
-     */
-
-    input_arc_info = vector<arc_info>(n_paths);
-    nodes_with_mandatory_arcs = vector<vector<int>>(n_paths);
-    int n_arc_types,arc_type,n_arcs;
-    for(int i=0;i<n_paths;i++)
-    {
-        input_arc_info[i].arcs = vector<vector<int>>(3);
-        f >> n_arc_types;
-        for(int j=0;j<n_arc_types;j++)
-        {
-            f >> arc_type;
-            f >> n_arcs;
-            vector<int> arcs(n_arcs,0);
-            for(int k=0;k<n_arcs;k++)
-            {
-                f >> arcs[k];
-            }
-            input_arc_info[i].arcs[arc_type] = arcs;
-            //if the arc is amandatory one, holds in a vector with no duplicates
-            if(arc_type == 1)
-            {
-                for(int k=0;k<arcs.size();k++)
-                {
-                    if(find(nodes_with_mandatory_arcs[arcs[k]].begin(),nodes_with_mandatory_arcs[arcs[k]].end(),i)==nodes_with_mandatory_arcs[arcs[k]].end())
-                    {
-                        nodes_with_mandatory_arcs[arcs[k]].push_back(i);
-                    }
-                }
-            }
-        }
-    }
-
-
-
 }
 
 void schedule_flow::create_att_path()
@@ -272,11 +103,6 @@ void schedule_flow::create_jobs()
 
 }
 
-void schedule_flow::optimize()
-{
-    optimize_constructive();
-}
-
 void schedule_flow::optimize_constructive()
 {
 
@@ -306,7 +132,7 @@ void schedule_flow::optimize_constructive()
                                 feasibility_hash[selected_node].disjoint_color.second + 1 + type_processing_times[input_truck[*it_job].type][selected_node]));
         }else{
             paint_node(*it_job,selected_node,make_pair(feasibility_hash[selected_node].disjoint_color.second + 1,
-                    feasibility_hash[selected_node].disjoint_color.second + 1 + type_processing_times[inputconta_truck[*it_job].type][selected_node]));
+                    feasibility_hash[selected_node].disjoint_color.second + 1 + type_processing_times[input_truck[*it_job].type][selected_node]));
         }
 
     }
@@ -524,7 +350,6 @@ int schedule_flow::select_node(map<int, feasibility> &feasibility_hash, pair<int
         }
 
     }
-
 
     if(best_mandatory_node == -1)
     {

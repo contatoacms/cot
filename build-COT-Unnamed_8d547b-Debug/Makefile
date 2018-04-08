@@ -54,12 +54,18 @@ SOURCES       = ../COT/main.cpp \
 		../COT/node.cpp \
 		../COT/job.cpp \
 		../COT/schedule_flow.cpp \
-		../COT/file_manager.cpp 
+		../COT/file_manager.cpp \
+		../COT/input_output.cpp \
+		../COT/simulation.cpp \
+		../COT/io_file.cpp 
 OBJECTS       = main.o \
 		node.o \
 		job.o \
 		schedule_flow.o \
-		file_manager.o
+		file_manager.o \
+		input_output.o \
+		simulation.o \
+		io_file.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -131,11 +137,17 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		../COT/COT.pro node.h \
 		job.h \
 		schedule_flow.h \
-		file_manager.h ../COT/main.cpp \
+		file_manager.h \
+		input_output.h \
+		simulation.h \
+		io_file.h ../COT/main.cpp \
 		../COT/node.cpp \
 		../COT/job.cpp \
 		../COT/schedule_flow.cpp \
-		../COT/file_manager.cpp
+		../COT/file_manager.cpp \
+		../COT/input_output.cpp \
+		../COT/simulation.cpp \
+		../COT/io_file.cpp
 QMAKE_TARGET  = COT
 DESTDIR       = 
 TARGET        = COT
@@ -331,22 +343,50 @@ compiler_clean:
 
 main.o: ../COT/main.cpp ../COT/job.h \
 		../COT/node.h \
-		../COT/file_manager.h
+		../COT/file_manager.h \
+		../COT/schedule_flow.h \
+		../COT/simulation.h \
+		../COT/input_output.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../COT/main.cpp
 
-node.o: ../COT/node.cpp ../COT/node.h \
-		../COT/job.h
+node.o: ../COT/node.cpp ../COT/node.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o node.o ../COT/node.cpp
 
 job.o: ../COT/job.cpp ../COT/job.h \
 		../COT/node.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o job.o ../COT/job.cpp
 
-schedule_flow.o: ../COT/schedule_flow.cpp ../COT/schedule_flow.h
+schedule_flow.o: ../COT/schedule_flow.cpp ../COT/schedule_flow.h \
+		../COT/file_manager.h \
+		../COT/job.h \
+		../COT/node.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o schedule_flow.o ../COT/schedule_flow.cpp
 
 file_manager.o: ../COT/file_manager.cpp ../COT/file_manager.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o file_manager.o ../COT/file_manager.cpp
+
+input_output.o: ../COT/input_output.cpp ../COT/input_output.h \
+		../COT/schedule_flow.h \
+		../COT/file_manager.h \
+		../COT/job.h \
+		../COT/node.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o input_output.o ../COT/input_output.cpp
+
+simulation.o: ../COT/simulation.cpp ../COT/simulation.h \
+		../COT/schedule_flow.h \
+		../COT/file_manager.h \
+		../COT/job.h \
+		../COT/node.h \
+		../COT/input_output.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o simulation.o ../COT/simulation.cpp
+
+io_file.o: ../COT/io_file.cpp ../COT/io_file.h \
+		../COT/input_output.h \
+		../COT/schedule_flow.h \
+		../COT/file_manager.h \
+		../COT/job.h \
+		../COT/node.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o io_file.o ../COT/io_file.cpp
 
 ####### Install
 

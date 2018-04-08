@@ -5,9 +5,10 @@
 #include <string>
 #include <iostream>
 #include <file_manager.h>
-#include <schedule_flow.h>
+//#include <schedule_flow.h>
 #include <algorithm>
 #include <list>
+#include <simulation.h>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ using namespace std;
 int main()
 {
 
-    schedule_flow s;
+    simulation s;
 
 
 
